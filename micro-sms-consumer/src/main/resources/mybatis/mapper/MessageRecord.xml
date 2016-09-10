@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="info.yywang.micro.sms.dao.MessageRecordDao">
+
+    <insert id="insert" parameterType="info.yywang.micro.sms.entity.MessageRecord" useGeneratedKeys="true" keyProperty="id">
+    <![CDATA[
+
+      INSERT INTO
+          sms_messagerecord
+          (MsgId
+          ,Phone
+          ,Body
+          ,TemplateId
+          ,Params
+          ,Status
+          ,Channel
+          ,SuccessTime
+          ,FailedTime
+          ,SendId
+          ,Remark
+          ,IsDeleted
+          ,CreateTime)
+      VALUES
+          (#{msgId}
+          ,#{phone}
+          ,#{body}
+          ,#{templateId}
+          ,#{params}
+          ,#{status.value}
+          ,#{channel.value}
+          ,#{successTime}
+          ,#{failedTime}
+          ,#{sendId}
+          ,#{remark}
+          ,#{isDeleted}
+          ,#{createTime})
+      ON DUPLICATE KEY UPDATE
+          CreateTime = CreateTime
+
+        ]]>
+    </insert>
+
+    <update id="update" parameterType="info.yywang.micro.sms.entity.MessageRecord">
+    <![CDATA[
+
+      UPDATE
+          sms_messagerecord
+      SET
+          TemplateId = #{templateId},
+          Status = #{status.value},
+          Channel = #{channel.value},
+          SuccessTime = #{successTime},
+          FailedTime = #{failedTime},
+          SendId = #{sendId},
+          Remark = #{remark}
+      WHERE
+          Id = #{id}
+      AND
+          IsDeleted = 0
+
+        ]]>
+    </update>
+
+</mapper>

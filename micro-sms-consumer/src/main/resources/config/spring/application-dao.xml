@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
+    http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context.xsd
+    http://www.springframework.org/schema/tx
+    http://www.springframework.org/schema/tx/spring-tx-4.2.xsd
+    ">
+
+    <bean id="dbResources" class="java.util.ArrayList">
+        <constructor-arg>
+            <list>
+                <value>/data/appdatas/sms/config/database.properties</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="dbPropertyConfigurer" class="com.iydsj.sw.common.ext.SWPropertyPlaceholderConfigurer">
+        <property name="order" value="1"/>
+        <property name="ignoreUnresolvablePlaceholders" value="true"/>
+        <property name="paths" ref="dbResources"/>
+        <property name="fileEncoding" value="utf-8"></property>
+    </bean>
+
+    <bean id="stat-filter" class="com.alibaba.druid.filter.stat.StatFilter">
+        <property name="slowSqlMillis" value="1000"/>
+        <property name="logSlowSql" value="true"/>
+    </bean>
+
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">
+        <!-- 基本属性 url、user、password -->
+        <property name="url" value="${dataSource.url}"/>
+        <property name="username" value="${dataSource.username}"/>
+        <property name="password" value="${dataSource.password}"/>
+
+        <!-- 配置初始化大小、最小、最大 -->
+        <property name="initialSize" value="${dataSource.initialSize}"/>
+        <property name="minIdle" value="${dataSource.minIdle}"/>
+        <property name="maxActive" value="${dataSource.maxActive}"/>
+
+        <!-- 配置获取连接等待超时的时间 -->
+        <property name="maxWait" value="60000"/>
+
+        <!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+        <property name="timeBetweenEvictionRunsMillis" value="60000"/>
+
+        <!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
+        <property name="minEvictableIdleTimeMillis" value="300000"/>
+
+        <property name="validationQuery" value="SELECT 'x'"/>
+        <property name="testWhileIdle" value="true"/>
+        <property name="testOnBorrow" value="false"/>
+        <property name="testOnReturn" value="false"/>
+
+        <!-- 打开PSCache，并且指定每个连接上PSCache的大小 -->
+        <property name="poolPreparedStatements" value="true"/>
+        <property name="maxPoolPreparedStatementPerConnectionSize" value="20"/>
+
+        <!-- 配置监控统计拦截的filters -->
+        <property name="filters" value="log4j"/>
+        <property name="proxyFilters">
+            <list>
+                <ref bean="stat-filter"/>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <!-- <property name="configLocation" value="classpath:mybatis/mybatis-config.xml"></property> -->
+        <!-- 自动扫描mapping.xml文件 -->
+        <property name="mapperLocations" value="classpath:mybatis/mapper/*.xml"/>
+        <property name="typeAliasesPackage" value="com.iydsj.sw.sms.entity"/>
+    </bean>
+
+    <bean id="sqlSessionTemplate" class="org.mybatis.spring.SqlSessionTemplate">
+        <constructor-arg ref="sqlSessionFactory"/>
+    </bean>
+
+    <!-- DAO接口所在包名，Spring会自动查找其下的类  配置扫描器-->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.iydsj.sw.sms.dao"/>
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
+    </bean>
+
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+
+</beans>

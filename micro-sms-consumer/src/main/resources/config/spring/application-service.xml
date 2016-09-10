@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+
+    <context:annotation-config/>
+
+    <!-- 启动Spring 注解扫描 -->
+    <context:component-scan base-package="com.iydsj.sw.common"/>
+
+    <context:component-scan base-package="com.iydsj.sw.sms"/>
+
+    <bean id="messagePropertyReader" class="com.iydsj.sw.common.ext.SWPropertiesFactoryBean">
+        <property name="paths">
+            <list>
+                <value>/data/appdatas/sms/config/message.properties</value>
+            </list>
+        </property>
+        <property name="fileEncoding" value="utf-8"/>
+    </bean>
+
+</beans>
